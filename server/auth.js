@@ -19,7 +19,7 @@ const generateToken = (user) => { // 토큰 생성하는 유틸리티 함수
 const isAuth = (req, res, next) => { // 사용자 권한 검증하는 미들웨어
     const bearerToken = req.headers.authorization // request header 요청헤더의 Authorization 속성
     if(!bearerToken){
-        res.status(401).json({ message : 'Token is not supplied '}) //401 권한 없음
+        return res.status(401).json({ message : 'Token is not supplied '}) //401 권한 없음
     }else{
         const token = bearerToken.slice(7, bearerToken.length) // "bearer " 글자 제거
         jwt.verify(token, config.JWT_SECRET, (err, userInfo) => {
@@ -38,7 +38,7 @@ const isAdmin = (req, res, next) => { // 관리자 여부 검증하는 미들웨
     if(req.user && req.user.isAdmin){
         next()
     }else{
-        res.status(401).json({ code: 401, message: 'You are not valid admin user!'})
+        return res.status(401).json({ code: 401, message: 'You are not valid admin user!'})
     }
 }
 

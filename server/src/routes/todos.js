@@ -1,6 +1,6 @@
 const express = require('express')
 const Todo = require('../models/Todo')
-
+const { isAuth } = require('../../auth')
 const router = express.Router()
 
 router.get('/', (req, res, next) => {
