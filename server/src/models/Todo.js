@@ -9,6 +9,16 @@ const todoSchema = new Schema({ // 스키마 정의
         required: true, // 무조건 author 필드는 있어야 하기때문에 true로 준다
         ref: 'User' // User 라는 데이터 모델 (사용자 ID값 저장)
     },
+    category: {
+        type: String,
+        required: true,
+        trim: true
+    },
+    imgUrl: {
+        type: String,
+        required: true,
+        trim: true
+    },
     title: {
         type: String,
         required: true,

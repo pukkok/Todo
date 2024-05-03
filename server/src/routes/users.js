@@ -52,15 +52,18 @@ router.post('/logout', (req, res, next) => {
     res.json('로그아웃')
 })
 
-router.put('/:id', isAuth, 
+router.put('/', isAuth, 
 expressAsyncHandler( async(req, res, next) => {
-    const user = await User.findById(req.params.id) // 사용자가 회원인지 검사
+    const user = await User.findById(req.user._id) // 사용자가 회원인지 검사
     if(!user){
         return res.status(404).json({ code: 404, message: 'User Not Founded'})
     }else{
         user.name = req.body.name || user.name
         user.email = req.body.email || user.email
         user.password = req.body.password || user.password
+        
+        user.lastModifiedAt = new Date() // 사용자정보 수정 시각
+
         const updatedUser = await user.save() // 실제 사용자정보 수정을 DB에 반영
         const { name, email, userId, isAdmin, createdAt } = updatedUser
         res.json({
