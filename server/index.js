@@ -13,7 +13,8 @@ const {wrap, asyncFunction} = require('./async')
 
 const corsOptions = {
     // origin: 'http://127.0.0.1:3000', // 해당 URL 주소만 요청을 허락함
-    origin: 'http://localhost:3000', // 해당 URL 주소만 요청을 허락함
+    // origin: 'http://localhost:3000', // 해당 URL 주소만 요청을 허락함
+    origin: '*',
     // IPV6, IPV4에 따라 다름 localhost 가 안될경우 127.0.0.1로 확인
     credentials: true // 사용자 인증이 필요한 리소스를 요청할 수 있도록 허용함
 }

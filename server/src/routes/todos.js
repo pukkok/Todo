@@ -107,10 +107,10 @@ router.get('/group/:field', isAuth, isAdmin, isFieldValid, expressAsyncHandler( 
                     _id: `$${req.params.field}`,
                     count: { $sum : 1 }
                 }
-            }
+            },
+            { $sort : { _id : 1} }
         ])
         console.log('Number Of Group: ', docs.length) // 그룹 갯수
-        docs.sort((d1, d2) => d1._id - d2._id ) // _id 기준 오름차순 정렬
         res.json({ code: 200, docs })
 }))
 
@@ -124,17 +124,15 @@ router.get('/group/mine/:field', isAuth, isFieldValid, expressAsyncHandler( asyn
                 _id: `$${req.params.field}`,
                 count: { $sum : 1 }
             }
-        }
+        },
+        { $sort : { _id : 1} }
     ])
     console.log(`Number Of Group: ${docs.length}`) // 그룹 갯수
-    docs.sort((d1, d2) => d1._id - d2._id ) // _id 기준 오름차순 정렬
     res.json({ code: 200, docs })
 }))
 
-router.get('/group/date/:field', isAuth, isAdmin, expressAsyncHandler( async(req, res, next) => {
-    const filter = ['createdAt', 'lastModifiedAt', 'finishedAt']
-    
-    if(filter.includes(req.params.field)){
+// /group/date/ isAdmin true ? /:field : /mine/:field
+router.get('/group/date/:field', isAuth, isAdmin, isDateFieldValid, expressAsyncHandler( async(req, res, next) => {
             const docs = await Todo.aggregate([
                 {
                     $group: {
@@ -144,20 +142,16 @@ router.get('/group/date/:field', isAuth, isAdmin, expressAsyncHandler( async(req
                         },
                         count : { $sum : 1 }
                     }
-                }
+                },
+                { $sort : { _id : 1} }
             ])
             console.log(`Number Of Group: ${docs.length}`) // 그룹 갯수
-            docs.sort((d1, d2) => d1._id - d2._id ) // _id 기준 오름차순 정렬
             res.json({ code: 200, docs })
-        }else{
-            res.status(400).json({ code : 400, message: 'you gave wrong field to group documents !'})
-        }
-    
+
 }))
 
-router.get('/group/date/mine/:field', isAuth, expressAsyncHandler( async(req, res, next) => {
-    const filter = ['createdAt', 'lastModifiedAt', 'finishedAt']
-    if(filter.includes(req.params.field)){
+router.get('/group/date/mine/:field', isAuth, isDateFieldValid, expressAsyncHandler( async(req, res, next) => {
+
             const docs = await Todo.aggregate([
                 {
                     $match: { author: new ObjectId(req.user._id) }
@@ -170,14 +164,12 @@ router.get('/group/date/mine/:field', isAuth, expressAsyncHandler( async(req, re
                         },
                         count : { $sum : 1 }
                     }
-                }
+                },
+                { $sort : { _id : 1} }
             ])
             console.log(`Number Of Group: ${docs.length}`) // 그룹 갯수
-            docs.sort((d1, d2) => d1._id - d2._id ) // _id 기준 오름차순 정렬
             res.json({ code: 200, docs })
-    }else{
-        res.status(400).json({ code : 400, message: 'you gave wrong field to group documents !'})
-    }
+
 }))
 module.exports = router
 
@@ -186,5 +178,14 @@ function isFieldValid (req, res, next) {
         next()
     }else{
         res.status(400).json({ code: 400, message: 'you gave wrong field to group documents !'})
+    }
+}
+
+function isDateFieldValid (req, res, next) {
+    const filter = ['createdAt', 'lastModifiedAt', 'finishedAt']
+    if(filter.includes(req.params.field)){
+        next()
+    }else{
+        res.status(400).json({ code : 400, message: 'you gave wrong field to group documents !'})
     }
 }
