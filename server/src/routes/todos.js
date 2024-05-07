@@ -1,7 +1,11 @@
 const express = require('express')
 const Todo = require('../models/Todo')
-const { isAuth } = require('../../auth')
+const { isAuth, isAdmin } = require('../../auth')
 const expressAsyncHandler = require('express-async-handler')
+const mongoose = require('mongoose')
+const { Types: { ObjectId }} = mongoose
+
+
 const router = express.Router()
 
 router.get('/', isAuth, expressAsyncHandler( async(req, res, next) => {
@@ -96,4 +100,91 @@ router.delete('/:id', isAuth, expressAsyncHandler( async(req, res, next) => {
     }
 }))
 
+router.get('/group/:field', isAuth, isAdmin, isFieldValid, expressAsyncHandler( async(req, res, next) => {        
+        const docs = await Todo.aggregate([
+            {
+                $group: {
+                    _id: `$${req.params.field}`,
+                    count: { $sum : 1 }
+                }
+            }
+        ])
+        console.log('Number Of Group: ', docs.length) // 그룹 갯수
+        docs.sort((d1, d2) => d1._id - d2._id ) // _id 기준 오름차순 정렬
+        res.json({ code: 200, docs })
+}))
+
+router.get('/group/mine/:field', isAuth, isFieldValid, expressAsyncHandler( async(req, res, next) => {
+    const docs = await Todo.aggregate([
+        {
+            $match: { author: new ObjectId(req.user._id)} // 내가 작성한 할일목록 필터링
+        },
+        {
+            $group: {
+                _id: `$${req.params.field}`,
+                count: { $sum : 1 }
+            }
+        }
+    ])
+    console.log(`Number Of Group: ${docs.length}`) // 그룹 갯수
+    docs.sort((d1, d2) => d1._id - d2._id ) // _id 기준 오름차순 정렬
+    res.json({ code: 200, docs })
+}))
+
+router.get('/group/date/:field', isAuth, isAdmin, expressAsyncHandler( async(req, res, next) => {
+    const filter = ['createdAt', 'lastModifiedAt', 'finishedAt']
+    
+    if(filter.includes(req.params.field)){
+            const docs = await Todo.aggregate([
+                {
+                    $group: {
+                        _id: { 
+                            year: { $year: `$${req.params.field}`}, 
+                            month: { $month: `$${req.params.field}`}
+                        },
+                        count : { $sum : 1 }
+                    }
+                }
+            ])
+            console.log(`Number Of Group: ${docs.length}`) // 그룹 갯수
+            docs.sort((d1, d2) => d1._id - d2._id ) // _id 기준 오름차순 정렬
+            res.json({ code: 200, docs })
+        }else{
+            res.status(400).json({ code : 400, message: 'you gave wrong field to group documents !'})
+        }
+    
+}))
+
+router.get('/group/date/mine/:field', isAuth, expressAsyncHandler( async(req, res, next) => {
+    const filter = ['createdAt', 'lastModifiedAt', 'finishedAt']
+    if(filter.includes(req.params.field)){
+            const docs = await Todo.aggregate([
+                {
+                    $match: { author: new ObjectId(req.user._id) }
+                },
+                {
+                    $group: {
+                        _id: { 
+                            year: { $year: `$${req.params.field}`}, 
+                            month: { $month: `$${req.params.field}`}
+                        },
+                        count : { $sum : 1 }
+                    }
+                }
+            ])
+            console.log(`Number Of Group: ${docs.length}`) // 그룹 갯수
+            docs.sort((d1, d2) => d1._id - d2._id ) // _id 기준 오름차순 정렬
+            res.json({ code: 200, docs })
+    }else{
+        res.status(400).json({ code : 400, message: 'you gave wrong field to group documents !'})
+    }
+}))
 module.exports = router
+
+function isFieldValid (req, res, next) {
+    if(req.params.field === 'category' || req.params.field === 'isDone'){
+        next()
+    }else{
+        res.status(400).json({ code: 400, message: 'you gave wrong field to group documents !'})
+    }
+}
