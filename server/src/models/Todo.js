@@ -47,16 +47,13 @@ const todoSchema = new Schema({ // 스키마 정의
     // 복잡한 몽고 db 필드가 더 추가 되어야 함
 })
 
+todoSchema.path('category').validate((value)=>{
+    return /오락|공부|음식|자기계발|업무|패션|여행/.test(value)
+}, 'category `{VALUE}` 는 유효하지 않은 카테고리입니다.')
+
+
 // 스키마 -> 컴파일(몽고db가 인식할수 있는 데이터 구조로 변환) -> 모델
 const Todo = mongoose.model('Todo', todoSchema) 
 // 컬렉션 이름 : Todo에서 첫번째 글자를 소문자로 변경하고 맨 끝에 s 붙임
 // => 결과 : todos
 module.exports = Todo
-
-// todo 데이터 생성 테스트
-// const todo = new Todo({
-//     author: '111111222222333333444444', // 몽고 db의 고유 id값
-//     title: '주말에 거북섬 놀러가기',
-//     description: '가서 먹을만한 것 있는지 맛집 찾기'
-// })
-// todo.save().then(()=> console.log('할일 생성 성공')) // 실제 데이터베이스에 저장

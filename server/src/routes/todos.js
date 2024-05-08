@@ -150,7 +150,7 @@ router.get('/group/date/:field', isAuth, isAdmin, isDateFieldValid, expressAsync
 
 }))
 
-router.get('/group/date/mine/:field', isAuth, isDateFieldValid, expressAsyncHandler( async(req, res, next) => {
+router.get('/group/mine/date/:field', isAuth, isDateFieldValid, expressAsyncHandler( async(req, res, next) => {
 
             const docs = await Todo.aggregate([
                 {

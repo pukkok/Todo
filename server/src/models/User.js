@@ -33,17 +33,15 @@ const userSchema = new Schema({
     }
 })
 
+// ()? 옵션 있어도 되고, 없어도 된다.
+userSchema.path('email').validate((value)=>{
+    return /^[a-zA-Z0-9]+@{1}[a-z]+(\.[a-z]{2})?(\.[a-z]{2,3})$/.test(value)
+}, '`{VALUE}`은/(는) 잘못된 이메일 형식입니다.')
+
+userSchema.path('password').validate((value)=>{
+    return /^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{7,15}/.test(value)
+}, 'password `{VALUE}`는 잘못된 비밀번호 형식 입니다.')
+
 const User = mongoose.model('User', userSchema)
 
 module.exports = User
-
-// const user = new User({
-//     name: '눈높이',
-//     email: 'np@gmail.com',
-//     userId: 'nunnoP',
-//     password: '123123123',
-//     isAdmin: true
-
-// })
-
-// user.save().then(()=>console.log('회원가입 성공'))
