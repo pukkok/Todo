@@ -1,6 +1,9 @@
 const mongoose = require('mongoose')
 const { Schema } = mongoose
 
+const moment = require('moment')
+
+
 const userSchema = new Schema({
     name: {
         type: String,
@@ -41,6 +44,18 @@ userSchema.path('email').validate((value)=>{
 userSchema.path('password').validate((value)=>{
     return /^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{7,15}/.test(value)
 }, 'password `{VALUE}`는 잘못된 비밀번호 형식 입니다.')
+
+userSchema.virtual('status').get(function (){ // function으로 써야 this값을 가져온다.
+    return this.isAdmin ? '관리자' : '사용자'
+})
+
+userSchema.virtual('createdAgo').get(function (){
+    return moment(this.createdAt).locale('ko').fromNow()
+})
+
+userSchema.virtual('lastModifiedAgo').get(function (){
+    return moment(this.lastModifiedAt).locale('ko').fromNow()
+})
 
 const User = mongoose.model('User', userSchema)
 

@@ -1,4 +1,5 @@
 const mongoose = require('mongoose')
+const moment = require('moment')
 const { Schema } = mongoose
 const { Types : {ObjectId} } = Schema
 // ObjectId : MONGODB ID 값의 자료형 (data type)
@@ -51,6 +52,21 @@ todoSchema.path('category').validate((value)=>{
     return /오락|공부|음식|자기계발|업무|패션|여행/.test(value)
 }, 'category `{VALUE}` 는 유효하지 않은 카테고리입니다.')
 
+todoSchema.virtual('status').get(function(){
+    return this.isDone ? '종료' : '진행중'
+})
+
+todoSchema.virtual('createdAgo').get(function(){
+    return moment(this.createdAt).locale('ko').fromNow()
+})
+
+todoSchema.virtual('lastModifiedAgo').get(function(){
+    return moment(this.lastModifiedAt).locale('ko').fromNow()
+})
+
+todoSchema.virtual('finishedAgo').get(function(){
+    return moment(this.finishedAt).locale('ko').fromNow()
+})
 
 // 스키마 -> 컴파일(몽고db가 인식할수 있는 데이터 구조로 변환) -> 모델
 const Todo = mongoose.model('Todo', todoSchema) 

@@ -12,7 +12,6 @@ const validateUserName = () => {
     return isFieldEmpty('name')
             .isLength({ min: 2, max: 20 }) // 회원명 (2자~20자)
             .withMessage('user anme length must be between 2 to 20 characters')
-            .escape
 }
 
 const validateUserEmail = () => {
@@ -35,12 +34,31 @@ const validateUserPassword = () => {
             .matches(/[!@#$%^&*]/)
             .withMessage('password must be at least 1 special character')
             .bail() // value: 요청본문에서 전달된 비밀번호
-            .custom((value, { req }) => req.body.confirmPassword === value) // filter 메서드처럼 동작
+            .custom( (value, { req }) => { req.body.confirmPassword === value }) // filter 메서드처럼 동작
             .withMessage(`password don't match`)
+}
+
+const validateTodoTitle = () => {
+    return isFieldEmpty("title")
+    .isLength({ min: 2, max: 20 }) // 2~20자
+    .withMessage("todo title length must be between 2 ~ 20 characters")
+} 
+const validateTodoDescription = () => {
+    return isFieldEmpty("description")
+    .isLength({ min: 5, max: 100 }) // 5 ~100자
+    .withMessage("todo description length must be between 5 ~ 100 characters")
+}
+const validateTodoCategory = () => {
+    return isFieldEmpty("category")
+    .isIn(['오락', '공부', '음식', '자기계발', '업무', '패션', '여행'])
+    .withMessage('todo category must be one of 오락 | 공부 | 음식 | 자기계발 | 업무 | 패션 | 여행')
 }
 
 module.exports = ({
     validateUserName,
     validateUserEmail,
-    validateUserPassword
+    validateUserPassword,
+    validateTodoTitle,
+    validateTodoDescription,
+    validateTodoCategory
 })
